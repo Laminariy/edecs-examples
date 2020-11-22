@@ -9,7 +9,7 @@ class CreateSystem(System):
         hero.inventory = InventoryComponent()
 
         sword = Entity(entity_type='Sword', name='FireSword')
-        sword.item = ItemComponent(stackable=False)
+        sword.item = ItemComponent(stack_size=1)
 
         health_potion = Entity(entity_type='HealthPotion', name='Health Potion')
         health_potion.item = ItemComponent(stack_size=10)
