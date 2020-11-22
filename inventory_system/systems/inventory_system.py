@@ -112,20 +112,16 @@ class InventorySystem(System):
 
                     else: # count < item[1]
                         inventory.items[i] = (item_id, item[1] - count)
-                        self.generate_event('RemoveItemSucsessEvent',
-                                            {'inventory_id':inventory_id,
-                                            'item_id':item_id,
-                                            'count':count})
                         count = 0
 
             if count == 0:
                 for item in removed_items:
                     inventory.items.remove(item)
 
-                    self.generate_event('RemoveItemSucsessEvent',
-                                        {'inventory_id':inventory_id,
-                                        'item_id':item_id,
-                                        'count':item[1]})
+                self.generate_event('RemoveItemSucsessEvent',
+                                    {'inventory_id':inventory_id,
+                                    'item_id':item_id,
+                                    'count':old_count})
 
             else:
                 self.generate_event('InventoryHasNoItemsEvent',
