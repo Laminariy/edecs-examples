@@ -25,7 +25,7 @@ class InventorySystem(System):
 
         return True
 
-    def add_item(inventory_id, item_id, count=1):
+    def add_item(self, inventory_id, item_id, count=1):
         if self.inventory_exists(inventory_id) and self.item_exists(item_id):
             inventory = self.component_manager.component_types[self.comp_name][inventory_id]
             item = self.component_manager.component_types['ItemComponent'][item_id]
@@ -35,14 +35,14 @@ class InventorySystem(System):
 
                 for i, inv_item in enumerate(inventory.items): # item with free space in stack
                     if inv_item[0] == item_id and inv_item[1] < stack_size:
-                        item_count = inventory.items[inventory_item][1]
+                        item_count = inv_item[1]
                         new_item_count = min(item_count + count, stack_size)
 
-                        inventory.items[inventory_item] = (item_id, new_item_count)
+                        inventory.items[i] = (item_id, new_item_count)
                         self.generate_event('AddItemSucsessEvent',
                                             {'inventory_id':inventory_id,
                                             'item_id':item_id,
-                                            'count':count})
+                                            'count':new_item_count - item_count})
                         count -= new_item_count - item_count
                         break
 
@@ -53,13 +53,13 @@ class InventorySystem(System):
                         self.generate_event('AddItemSucsessEvent',
                                             {'inventory_id':inventory_id,
                                             'item_id':item_id,
-                                            'count':count})
+                                            'count':stack_size})
 
                     else:
                         self.generate_event('InventoryHasNoFreeSpaceEvent',
                                             {'inventory_id':inventory_id,
                                             'item_id':item_id,
-                                            'count':count})
+                                            'count':stack_size})
                         return
 
                 if count > 0:
@@ -83,19 +83,23 @@ class InventorySystem(System):
                         self.generate_event('AddItemSucsessEvent',
                                             {'inventory_id':inventory_id,
                                             'item_id':item_id,
-                                            'count':count})
+                                            'count':1})
 
                     else:
                         self.generate_event('InventoryHasNoFreeSpaceEvent',
                                             {'inventory_id':inventory_id,
                                             'item_id':item_id,
-                                            'count':count})
+                                            'count':1})
                         break
 
-    def remove_item(inventory_id, item_id, count=1):
+    def remove_item(self, inventory_id, item_id, count=1):
         if self.inventory_exists(inventory_id) and self.item_exists(item_id):
+            old_count = count
             inventory = self.component_manager.component_types[self.comp_name][inventory_id]
-            removed_items = [] # [inv_id1, inv_id2]
+            removed_items = [] # [(item_id, count)]
+
+            # reverse inventory.items
+            inventory.items.reverse()
 
             for i, item in enumerate(inventory.items):
                 if count == 0:
@@ -103,35 +107,42 @@ class InventorySystem(System):
 
                 if item[0] == item_id:
                     if count >= item[1]:
-                        removed_items.append(i)
+                        removed_items.append(item)
                         count -= item[1]
 
                     else: # count < item[1]
                         inventory.items[i] = (item_id, item[1] - count)
+                        self.generate_event('RemoveItemSucsessEvent',
+                                            {'inventory_id':inventory_id,
+                                            'item_id':item_id,
+                                            'count':count})
                         count = 0
 
             if count == 0:
                 for item in removed_items:
-                    inventory.items.pop(item)
+                    inventory.items.remove(item)
 
-                self.generate_event('RemoveItemSucsessEvent',
-                                    {'inventory_id':inventory_id,
-                                    'item_id':item_id,
-                                    'count':count})
+                    self.generate_event('RemoveItemSucsessEvent',
+                                        {'inventory_id':inventory_id,
+                                        'item_id':item_id,
+                                        'count':item[1]})
 
             else:
                 self.generate_event('InventoryHasNoItemsEvent',
                                     {'inventory_id':inventory_id,
                                     'item_id':item_id,
-                                    'count':count})
+                                    'count':old_count})
+
+            # reverse inventory.items
+            inventory.items.reverse()
 
     def on_add_item_event(self, event):
-        inventory_id, item_id, count = event.data
+        inventory_id, item_id, count = event.data.values()
 
         self.add_item(inventory_id, item_id, count)
 
     def on_remove_item_event(self, event):
-        inventory_id, item_id, count = event.data
+        inventory_id, item_id, count = event.data.values()
 
         self.remove_item(inventory_id, item_id, count)
 
