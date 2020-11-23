@@ -61,8 +61,8 @@ class MovementSystem(System):
 
     def move_entity(self, position_id, location_id):
         if self.position_exists(position_id) and self.location_exists(location_id):
-            location = self.component_manager.component_types['LocationComponent'][location_id]
             position = self.component_manager.component_types['PositionComponent'][position_id]
+            location = self.component_manager.component_types['LocationComponent'][position.position]
 
             if location_id in location.connections: # move
                 self.remove_entity_from_location(position_id, position.position)
