@@ -1,0 +1,2 @@
+from .location_component import LocationComponent
+from .position_component import PositionComponent
