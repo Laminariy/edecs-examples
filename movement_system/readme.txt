@@ -12,7 +12,17 @@
 Системы:
   MovementSystem - система перемещения
     Принимаемые события:
+      AddEntityToLocationEvent - добавить сущность на локацию
+        entity_id - айди сущности
+        location_id - айди локации
 
+      RemoveEntityFromLocationEvent - удалить сущность из локации
+        entity_id - айди сущности
+        location_id - айди локации
+
+      MoveEntityEvent - переместить сущность между локациями
+        entity_id - айди сущности
+        location_id - айди локации (куда переместить)
 
     Генерируемые события:
       EntityDoesNotExistEvent - сущность не существует

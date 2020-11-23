@@ -75,3 +75,26 @@ class MovementSystem(System):
                 self.generate_event('LocationHasNoConnectionEvent',
                                     {'loc_from_id':position.position,
                                     'loc_to_id':location_id})
+
+    def on_add_entity_to_location_event(self, event):
+        position_id = event.entity_id
+        location_id = event.location_id
+
+        self.add_entity_to_location(position_id, location_id)
+
+    def on_remove_entity_from_location_event(self, event):
+        position_id = event.entity_id
+        location_id = event.location_id
+
+        self.remove_entity_from_location(position_id, location_id)
+
+    def on_move_entity_event(self, event):
+        position_id = event.entity_id
+        location_id = event.location_id
+
+        self.move_entity(position_id, location_id)
+
+    def init(self):
+        self.subscribe(self.on_add_entity_to_location_event, 'AddEntityToLocationEvent')
+        self.subscribe(self.on_remove_entity_from_location_event, 'RemoveEntityFromLocationEvent')
+        self.subscribe(self.on_move_entity_event, 'MoveEntityEvent')
