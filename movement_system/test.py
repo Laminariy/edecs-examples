@@ -28,6 +28,7 @@ class LogSystem(System):
         self.subscribe(self.log, 'LocationRemoveEntitySucsessEvent')
         self.subscribe(self.log, 'MoveEntitySucsessEvent')
         self.subscribe(self.log, 'LocationHasNoConnectionEvent')
+        self.subscribe(self.log, 'TeleportEntitySucsessEvent')
 
 class CreateSystem(System):
 
@@ -74,6 +75,11 @@ def main():
     engine.generate_input('MoveEntityEvent', {'entity_id': 0, 'location_id': 2})
     engine.generate_input('MoveEntityEvent', {'entity_id': 0, 'location_id': 1})
     engine.generate_input('MoveEntityEvent', {'entity_id': 0, 'location_id': 3})
+
+    engine.update()
+    print(hero.position)
+
+    engine.generate_input('TeleportEntityEvent', {'entity_id': 0, 'location_id': 3})
 
     engine.update()
     print(hero.position)

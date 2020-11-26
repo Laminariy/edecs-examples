@@ -24,6 +24,10 @@
         entity_id - айди сущности
         location_id - айди локации (куда переместить)
 
+      TeleportEntityEvent - телепортировать сущность из одной локации в другую
+        entity_id - айди сущности
+        location_id - айди локации (куда телепортировать)
+
     Генерируемые события:
       EntityDoesNotExistEvent - сущность не существует
         entity_id - айди сущности
@@ -57,3 +61,7 @@
       LocationHasNoConnectionEvent - перемещение не удалось, отсутствует путь из текущей локации в заданную
         loc_from_id - из какой локации нет пути
         loc_to_id - в какую локацию нет пути
+
+      TeleportEntitySucsessEvent - телепортация сущности успешна
+        entity_id - айди сущности
+        location_id - айди локации

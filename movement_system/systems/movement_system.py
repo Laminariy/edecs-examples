@@ -30,7 +30,7 @@ class MovementSystem(System):
             location = self.component_manager.component_types['LocationComponent'][location_id]
             position = self.component_manager.component_types['PositionComponent'][position_id]
 
-            if position_id in location.entities:
+            if position.position != -1:
                 self.generate_event('EntityAlreadyInLocationEvent',
                                     {'entity_id':position_id,
                                     'location_id':location_id})
@@ -62,11 +62,14 @@ class MovementSystem(System):
     def move_entity(self, position_id, location_id):
         if self.position_exists(position_id) and self.location_exists(location_id):
             position = self.component_manager.component_types['PositionComponent'][position_id]
-            location = self.component_manager.component_types['LocationComponent'][position.position]
+            old_location = self.component_manager.component_types['LocationComponent'][position.position]
+            new_location = self.component_manager.component_types['LocationComponent'][location_id]
 
-            if location_id in location.connections: # move
-                self.remove_entity_from_location(position_id, position.position)
-                self.add_entity_to_location(position_id, location_id)
+            if location_id in old_location.connections: # move
+                old_location.entities.remove(position_id)
+                new_location.entities.append(position_id)
+                position.position = location_id
+
                 self.generate_event('MoveEntitySucsessEvent',
                                     {'entity_id':position_id,
                                     'location_id':location_id})
@@ -75,6 +78,20 @@ class MovementSystem(System):
                 self.generate_event('LocationHasNoConnectionEvent',
                                     {'loc_from_id':position.position,
                                     'loc_to_id':location_id})
+
+    def teleport_entity(self, position_id, location_id):
+        if self.position_exists(position_id) and self.location_exists(location_id):
+            position = self.component_manager.component_types['PositionComponent'][position_id]
+            old_location = self.component_manager.component_types['LocationComponent'][position.position]
+            new_location = self.component_manager.component_types['LocationComponent'][location_id]
+
+            old_location.entities.remove(position_id)
+            new_location.entities.append(position_id)
+            position.position = location_id
+
+            self.generate_event('TeleportEntitySucsessEvent',
+                                {'entity_id':position_id,
+                                'location_id':location_id})
 
     def on_add_entity_to_location_event(self, event):
         position_id = event.entity_id
@@ -94,7 +111,14 @@ class MovementSystem(System):
 
         self.move_entity(position_id, location_id)
 
+    def on_teleport_entity_event(self, event):
+        position_id = event.entity_id
+        location_id = event.location_id
+
+        self.teleport_entity(position_id, location_id)
+
     def init(self):
         self.subscribe(self.on_add_entity_to_location_event, 'AddEntityToLocationEvent')
         self.subscribe(self.on_remove_entity_from_location_event, 'RemoveEntityFromLocationEvent')
         self.subscribe(self.on_move_entity_event, 'MoveEntityEvent')
+        self.subscribe(self.on_teleport_entity_event, 'TeleportEntityEvent')
